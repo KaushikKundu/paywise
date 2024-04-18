@@ -1,10 +1,10 @@
 const express = require("express");
 const userRouter = express.Router();
-const {authMiddleware} = require("../middleware")
+const { authMiddleware } = require("../middleware");
 const z = require("zod");
-const {User,Account} = require("../db");
+const { User, Account } = require("../db");
 const jwt = require("jsonwebtoken");
-const config = require("../config")
+const config = require("../config");
 const signupBody = z.object({
   username: z.string().email(),
   password: z.string(),
@@ -18,7 +18,7 @@ const signinBody = z.object({
 const updateBody = z.object({
   firstname: z.string().optional(),
   lastname: z.string().optional(),
-  password: z.number().optional()
+  password: z.number().optional(),
 });
 userRouter.post("/signup", async (req, res) => {
   // collecting formdata i.e schema design
@@ -30,7 +30,7 @@ userRouter.post("/signup", async (req, res) => {
     });
   }
   const existingUser = await User.findOne({ username: req.body.username });
-  console.log(existingUser)
+  console.log(existingUser);
   if (existingUser) {
     return res.status(409).json({
       message: "Email already exists",
@@ -43,17 +43,14 @@ userRouter.post("/signup", async (req, res) => {
     password: req.body.password,
   });
   const userId = user._id;
-  console.log(userId)
+  console.log(userId);
   // new  account creation
   await Account.create({
     userId,
-    balance: 1 + Math.random()*10000
-  })
-  
-  const token = jwt.sign(
-    {userId},
-    config.JWT_SECRET
-  );
+    balance: 1 + Math.random() * 10000,
+  });
+
+  const token = jwt.sign({ userId }, config.JWT_SECRET);
   res.json({
     message: "User created successfully",
     token,
@@ -84,18 +81,40 @@ userRouter.post("/signin", async (req, res) => {
     message: "Error while logging in",
   });
 });
-userRouter.put("/update",authMiddleware, async (req, res) => {
+userRouter.put("/", authMiddleware, async (req, res) => {
   const { success } = updateBody.safeParse(req.body);
   if (!success) {
     res.json({
-        message: "Error while updating information"    
-    })
+      message: "Error while updating information",
+    });
   }
-  await User.updateOne({_id: req.userId}, req.body);
+  await User.updateOne({ _id: req.userId }, req.body);
 
   res.json({
-    message: "Updated successfully"
-})
+    message: "Updated successfully",
+  });
+});
+userRouter.get("/bulk", async (req, res) => {
+  const filter = req.query.filter || "";
+  const users = await User.find({
+    $or: [
+      {
+        firstname: { $regex: filter },
+      },
+      { 
+        lastname: { $regex: filter } 
+      },
+    ]
+  });
+  
+  res.json({
+    user: users.map((user) => ({
+      username: user.username,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      _id: user._id
+    }))
+  })
 });
 
-module.exports = userRouter
+module.exports = userRouter;

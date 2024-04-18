@@ -5,13 +5,15 @@ import Button from "../components/Button";
 import BottomWarning from "../components/BottomWarning";
 import axios from "axios";
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const SignIn = () => {
   const navigate = useNavigate();
   const [username,setUsername] = useState("");
   const [password, setPassword] = useState("");
+  
   const handleSignin = async() => {
-  const res = await axios.post("http://localhost:3000/api/v1/user/signup",{
+  const res = await axios.post("http://localhost:3000/api/v1/user/signin",{
     username,
     password
   });
@@ -33,7 +35,7 @@ const SignIn = () => {
             label="Password"
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button text="Sign Up" onClick={handleSignin} />
+          <Button text="Sign In" onClick={handleSignin} />
           <BottomWarning
             text="Don't have an account?"
             link=" Sign Up"

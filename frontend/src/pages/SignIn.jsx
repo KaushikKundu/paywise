@@ -11,14 +11,18 @@ const SignIn = () => {
   const navigate = useNavigate();
   const [username,setUsername] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const handleSignin = async() => {
   const res = await axios.post("http://localhost:3000/api/v1/user/signin",{
     username,
     password
   });
-  localStorage.setItem("token",res.data.token) ;
-  navigate('/dashboard')
+  if(res.data.token){
+    localStorage.setItem("token",res.data.token) ;
+    navigate('/dashboard')
+  }else{
+    alert("Invalid credentials");
+  }
   }
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-black">

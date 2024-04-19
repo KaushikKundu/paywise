@@ -7,7 +7,7 @@ const Dashboard = () => {
         
         <div>
             <Navbar header={"PayWise"} user={"John Doe"} />
-            <Balance balance={10000}/>
+            <Balance balance={"100000"}/>
             <Users/>
         </div>
      );
